@@ -21,7 +21,7 @@ class MinMaxEngine(BaseEngine):
 
     def explore_tree(self, board, depth=0):
         if depth >= self.max_depth or board.is_game_over():
-            return self.value_function(board)
+            return self.value_function(board), None
 
         moves = []
         for move in board.legal_moves:
@@ -40,7 +40,7 @@ class MinMaxEngine(BaseEngine):
 
         for move_val, move in moves:
             board.push(move)
-            tval = self.explore_tree(board, depth + 1)
+            tval, _ = self.explore_tree(board, depth + 1)
             board.pop()
 
             if is_maximizing and tval >= val:
@@ -50,7 +50,7 @@ class MinMaxEngine(BaseEngine):
                 val = tval
                 computer_move = move
 
-        return computer_move, val
+        return val, computer_move
 
 
 if __name__ == "__main__":
