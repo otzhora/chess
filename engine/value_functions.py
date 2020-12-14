@@ -63,6 +63,7 @@ class ClassicValue(BaseValue):
                 val -= self.piece_values[piece.symbol().lower()]
 
         # center control
+        # TODO: needs to be FASTER
         for attack_from in range(64):
             piece = board.piece_at(attack_from)
 
@@ -80,6 +81,7 @@ class ClassicValue(BaseValue):
                     val -= self.square_mul * self.square_values[coord_i][coord_j]
 
         # mobility
+        # TODO: needs to be FASTER
         turn = board.turn
         board.turn = chess.WHITE
         val += 0.1 * board.legal_moves.count()
