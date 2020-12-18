@@ -2,7 +2,7 @@
 
 
 # TODO
-* alpha-beta pruning 
-* beam search 
+* improve speed
+* improve accuracy
 * king safety 
 * endgames tables
