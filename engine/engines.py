@@ -12,19 +12,31 @@ class BaseEngine:
 
 
 class MinMaxEngine(BaseEngine):
-    def __init__(self, value_function, max_depth):
+    def __init__(self, value_function, max_depth, beam_search=True):
         super(MinMaxEngine, self).__init__(value_function)
         self.max_depth = max_depth
+        self.nodes_explored = 0
+        self.beam_search = beam_search
+        self.seen_positions = {}
 
     def __call__(self, board):
+        self.nodes_explored = 0
         return self.explore_tree(board)
 
-    def explore_tree(self, board, depth=0):
+    def explore_tree(self, board, depth=0, alpha=None, beta=None):
+
+        if alpha is None:
+            alpha = self.value_function.MINVALUE
+        if beta is None:
+            beta = self.value_function.MAXVALUE
+
+        self.nodes_explored += 1
         if depth >= self.max_depth or board.is_game_over():
             return self.value_function(board), None
 
+        legal_moves = self.seen_positions.get(board.fen(), list(board.legal_moves))
         moves = []
-        for move in board.legal_moves:
+        for move in legal_moves:
             board.push(move)
             moves.append((self.value_function(board), move))
             board.pop()
@@ -38,17 +50,27 @@ class MinMaxEngine(BaseEngine):
         moves = sorted(moves, key=lambda x: x[0], reverse=is_maximizing)
         computer_move = moves[0]
 
+        # beam search
+        if self.beam_search and depth >= 3:
+            moves = moves[:10]
+
         for move_val, move in moves:
             board.push(move)
-            tval, _ = self.explore_tree(board, depth + 1)
+            tval, _ = self.explore_tree(board, depth + 1, alpha, beta)
             board.pop()
 
             if is_maximizing and tval >= val:
                 val = tval
                 computer_move = move
+                alpha = max(alpha, val)
+                if alpha >= beta:
+                    break
             elif not is_maximizing and tval <= val:
                 val = tval
                 computer_move = move
+                beta = min(beta, val)
+                if beta <= alpha:
+                    break
 
         return val, computer_move
 
