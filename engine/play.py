@@ -1,6 +1,7 @@
 # Taken from https://github.com/geohot/twitchchess
 import base64
 import traceback
+import time
 import os
 
 import chess
@@ -29,8 +30,12 @@ def hello():
 
 def computer_move():
     # computer move
+    st = time.time()
     val, move = engine(board)
-    print(board.turn, "moving", move)
+    et = time.time()
+    print("WHITE" if board.turn else "BLACK", "moving", move)
+    print(f"explored {engine.nodes_explored} nodes in {(et - st)} seconds")
+    print(f"position value: {val}")
     board.push(move)
 
 
