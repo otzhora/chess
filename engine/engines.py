@@ -18,13 +18,15 @@ class MinMaxEngine(BaseEngine):
         self.nodes_explored = 0
         self.beam_search = beam_search
         self.seen_positions = {}
+        self.move_number = 1
 
     def __call__(self, board):
         self.nodes_explored = 0
+        self.move_number = board.fullmove_number * 2 - board.turn
+        self.clean_seen_positions()
         return self.explore_tree(board)
 
     def explore_tree(self, board, depth=0, alpha=None, beta=None):
-
         if alpha is None:
             alpha = self.value_function.MINVALUE
         if beta is None:
@@ -34,7 +36,9 @@ class MinMaxEngine(BaseEngine):
         if depth >= self.max_depth or board.is_game_over():
             return self.value_function(board), None
 
-        legal_moves = self.seen_positions.get(board.fen(), list(board.legal_moves))
+        position = self.seen_positions.get(board.fen(), {"moves": list(board.legal_moves), "depth": self.move_number + depth})
+        self.seen_positions[board.fen()] = position
+        legal_moves = position["moves"]
         moves = []
         for move in legal_moves:
             board.push(move)
@@ -73,6 +77,17 @@ class MinMaxEngine(BaseEngine):
                     break
 
         return val, computer_move
+
+    def clean_seen_positions(self, depth=0):
+        moves_to_delete = []
+        for k,v in self.seen_positions.items():
+            if self.move_number > v["depth"]:
+                moves_to_delete.append(k)
+
+        print(f"cleaned {len(moves_to_delete)} unreachable positions out of {len(self.seen_positions)}")
+
+        for k in moves_to_delete:
+            del self.seen_positions[k]
 
 
 if __name__ == "__main__":
