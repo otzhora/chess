@@ -15,7 +15,7 @@ from engine.engines import *
 app = Flask(__name__, static_folder="../static")
 
 board = chess.Board()
-engine = MinMaxEngine(value_function=ClassicValue, max_depth=3)
+engine = MinMaxEngine(value_function=ClassicValue, max_depth=4)
 
 
 def to_svg():
